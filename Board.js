@@ -1,5 +1,5 @@
-const sideLengthPx = 304;
-const sideLengthBlocks = 16;
+const sideLengthPx = window.innerWidth * 0.12;
+const sideLengthBlocks = 8;
 const blockSidePx = sideLengthPx / sideLengthBlocks;
 const boardDimensions = 4;
 
@@ -23,7 +23,7 @@ const findAdjacentBombs = (squares, coords) => {
 
 const getPlane = () => {
   const getSquareRow = () => Array.from({ length: sideLengthBlocks }, () => 
-  { return {hasBomb: Math.random() <= 0.20, isHidden: true, adjacentCount: 0}; });
+  { return {hasBomb: Math.random() <= 0.02, isHidden: true, adjacentCount: 0}; });
   const initSquares = Array.from({length: sideLengthBlocks}, () => getSquareRow());
   initSquares.forEach((row, y) => 
     row.forEach((sq, x) => { sq.adjacentCount = findAdjacentBombs(initSquares, x, y)}));
@@ -52,8 +52,6 @@ const getInitialSquares = dimensions => {
 
 
 const onHover = (e, canvas, highlighted, z, w) => {
-  e.stopPropagation();
-  e.preventDefault();
   const rect = canvas.getBoundingClientRect();
   const mouseX = e.clientX - rect.left;
   const mouseY = e.clientY - rect.top;
@@ -104,7 +102,7 @@ const draw = (ctx, squares, highlighted, z, w) => {
       ctx.strokeRect(x * blockSidePx, y * blockSidePx, blockSidePx, blockSidePx);
       if (currentSquare.adjacentCount > 0 && !currentSquare.isHidden && !currentSquare.hasBomb) {
         ctx.fillStyle = '#004cafff';
-        ctx.fillText(currentSquare.adjacentCount.toString(), x * blockSidePx, (y + 1) * blockSidePx);
+        ctx.fillText(currentSquare.adjacentCount.toString(), x * blockSidePx + 2, (y + 1) * blockSidePx - 2);
       }
     }
   };
@@ -157,10 +155,7 @@ const handleSquareClick = (x, y, z, w, squares) => {
   newSquares.forEach(sq => squares.push(sq));
 };
 
-const onClick = (e, canvas, squares) => {
-    e.stopPropagation();
-    e.preventDefault();
-    console.log('click');
+const onClick = (e, canvas, squares, z, w) => {
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
@@ -170,7 +165,7 @@ const onClick = (e, canvas, squares) => {
     const squareX = Math.floor(mouseX / blockSidePx);
     const squareY = Math.floor(mouseY / blockSidePx);
 
-    handleSquareClick(squareX, squareY, squares);
+    handleSquareClick(squareX, squareY, z, w, squares);
 };
 
 const buildHtml = (squares, highlighted) => {
@@ -187,12 +182,12 @@ const buildHtml = (squares, highlighted) => {
     planeRow.forEach((_, z) => {
       const canvas = document.createElement('canvas');
       canvas.addEventListener('mousemove', e => onHover(e, canvas, highlighted, z, w));
-      canvas.addEventListener('click', e => onClick(e, canvas, squares));
+      canvas.addEventListener('click', e => onClick(e, canvas, squares, z, w));
       canvas.setAttribute('width', sideLengthPx);
       canvas.setAttribute('height', sideLengthPx);
       canvas.id = `plane ${z}, ${w}`;
       const ctx = canvas.getContext('2d');
-      ctx.font = '12pt serif'
+      ctx.font = `${window.innerWidth * 0.008}px serif`
 
       planeRowDiv.appendChild(canvas);
       canvasRow.push({canvas, ctx})
@@ -210,6 +205,11 @@ const buildHtml = (squares, highlighted) => {
   const highlighted = {};
   const { canvases, boardDiv } = buildHtml(squares, highlighted);
   document.body.appendChild(boardDiv);
+
+  const cursor = document.getElementById('cursor');
+  cursor.style.width = window.innerWidth * 0.01 + 'px';
+  cursor.style.height = window.innerWidth * 0.01 + 'px';
+  document.addEventListener('mousemove', e => { cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px'; });
 
   drawAllLoop(squares, highlighted, canvases);
 })();

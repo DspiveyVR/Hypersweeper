@@ -1,3 +1,25 @@
-div, canvas {
-    padding: 10px;
+#board {
+    overflow: scroll;
+}
+
+canvas {
+    padding: 3px;
+}
+
+body {
+    cursor: none;
+}
+
+#cursor {
+    background-color: orange;
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    transform: translate(-10%, -10%);
+}
+
+.planeRow {
+    white-space: nowrap;   
+    width: 100%;           
+    box-sizing: border-box;
 }
