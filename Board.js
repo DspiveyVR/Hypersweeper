@@ -1,5 +1,5 @@
 const sideLengthPx = window.innerWidth * 0.12;
-const sideLengthBlocks = 8;
+const sideLengthBlocks = 16;
 const blockSidePx = sideLengthPx / sideLengthBlocks;
 const boardDimensions = 4;
 
@@ -50,7 +50,6 @@ const getInitialSquares = dimensions => {
   return squares;
 }
 
-
 const onHover = (e, canvas, highlighted, z, w) => {
   const rect = canvas.getBoundingClientRect();
   const mouseX = e.clientX - rect.left;
@@ -81,7 +80,6 @@ const draw = (ctx, squares, highlighted, z, w) => {
   for (let y = 0; y < sideLengthBlocks; y++) {
     for (let x = 0; x < sideLengthBlocks; x++) {
       const currentSquare = squares[w][z][y][x];
-
       if (getIsAdjacent(x, y, z, w, highlighted)) {
         ctx.strokeStyle = '#7593ffff';
       } else {
@@ -96,7 +94,9 @@ const draw = (ctx, squares, highlighted, z, w) => {
         } else {
           ctx.fillStyle = '#c5c5c5ff';
         }
-
+      }
+      if (currentSquare.hasFlag) {
+          ctx.fillStyle = '#eb12ffff';
       }
       ctx.fillRect(x * blockSidePx, y * blockSidePx, blockSidePx, blockSidePx);
       ctx.strokeRect(x * blockSidePx, y * blockSidePx, blockSidePx, blockSidePx);
@@ -110,21 +110,25 @@ const draw = (ctx, squares, highlighted, z, w) => {
   // window.requestAnimationFrame(() => draw(ctx, squares, highlighted))
 };
 
-const drawAllLoop = (squares, highlighted, canvases) => {
+const drawAllLoop = (squares, highlighted, canvases, gameOver) => {
   canvases.forEach((canvasRow, w) => {
     canvasRow.forEach((canvas, z) => {
       draw(canvas.ctx, squares, highlighted, z, w);
     });
   });
 
-  window.requestAnimationFrame(() => drawAllLoop(squares, highlighted, canvases));
+  if (!gameOver.restarting) {
+    window.requestAnimationFrame(() => drawAllLoop(squares, highlighted, canvases, gameOver));
+  }
 };
 
 // const getInitialSquares = () => {
 //   return Array.from({length: BOARD_SIDE}, () => getPlane());
 // };
 const clearSquareWithAdjacent = (x, y, z, w, newSquares) => {
-  newSquares[w][z][y][x].isHidden = false;
+  if (!newSquares[w][z][y][x].hasFlag) { 
+    newSquares[w][z][y][x].isHidden = false;
+  }
 
   if (newSquares[w][z][y][x].adjacentCount == 0) {
 
@@ -137,7 +141,9 @@ const clearSquareWithAdjacent = (x, y, z, w, newSquares) => {
               if (newSquares[i][j][k][l].adjacentCount == 0) {
                 clearSquareWithAdjacent(l, k, j, i, newSquares);
               } else {
-                newSquares[i][j][k][l].isHidden = false;
+                if (!newSquares[i][j][k][l].hasFlag) {
+                  newSquares[i][j][k][l].isHidden = false;
+                }
               }
             }
           }
@@ -155,7 +161,7 @@ const handleSquareClick = (x, y, z, w, squares) => {
   newSquares.forEach(sq => squares.push(sq));
 };
 
-const onClick = (e, canvas, squares, z, w) => {
+const onClick = (e, canvas, squares, z, w, firstClickDone, gameOver) => {
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
@@ -165,10 +171,55 @@ const onClick = (e, canvas, squares, z, w) => {
     const squareX = Math.floor(mouseX / blockSidePx);
     const squareY = Math.floor(mouseY / blockSidePx);
 
+    if (gameOver.gameOver) {
+      gameOver.restarting = true;
+      document.getElementById('gameOver').style.display = 'none';
+      init();
+      return;
+    }
+
+    if (squares[w][z][squareY][squareX].hasFlag) {
+      return;
+    }
+
+    if (squares[w][z][squareY][squareX].hasBomb) {
+      if (firstClickDone.state) {
+        gameOver.gameOver = true;
+        document.getElementById('gameOver').style.display = 'block';
+        squares.forEach(planeRow => 
+          planeRow.forEach(plane => 
+            plane.forEach(row => 
+              row.forEach(sq => sq.isHidden = false)
+            )
+          )
+        );
+      } else {
+        squares[w][z][squareY][squareX].hasBomb = false;
+      }
+    } 
+    
+    firstClickDone.state = true;
     handleSquareClick(squareX, squareY, z, w, squares);
 };
 
-const buildHtml = (squares, highlighted) => {
+const placeFlag = (e, canvas, squares, z, w) => {
+  e.preventDefault();
+
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
+  if (mouseX < 0 || mouseY < 0) {
+      return;
+  }
+  const squareX = Math.floor(mouseX / blockSidePx);
+  const squareY = Math.floor(mouseY / blockSidePx);
+
+  if (squares[w][z][squareY][squareX].isHidden) {
+    squares[w][z][squareY][squareX].hasFlag = !squares[w][z][squareY][squareX].hasFlag; // Inverts the state of the flag
+  }
+};
+
+const buildHtml = (squares, highlighted, firstClickDone, gameOver) => {
   const boardDiv = document.createElement('div');
   boardDiv.id = 'board';
   const canvases = [];
@@ -182,7 +233,8 @@ const buildHtml = (squares, highlighted) => {
     planeRow.forEach((_, z) => {
       const canvas = document.createElement('canvas');
       canvas.addEventListener('mousemove', e => onHover(e, canvas, highlighted, z, w));
-      canvas.addEventListener('click', e => onClick(e, canvas, squares, z, w));
+      canvas.addEventListener('click', e => onClick(e, canvas, squares, z, w, firstClickDone, gameOver), true);
+      canvas.addEventListener('contextmenu', e => placeFlag(e, canvas, squares, z, w), true);
       canvas.setAttribute('width', sideLengthPx);
       canvas.setAttribute('height', sideLengthPx);
       canvas.id = `plane ${z}, ${w}`;
@@ -200,16 +252,23 @@ const buildHtml = (squares, highlighted) => {
   return {canvases, boardDiv};
 };
 
-(() => {
+const init = () => {
+  document.getElementById('board')?.remove();
+
   const squares = getInitialSquares(boardDimensions);
   const highlighted = {};
-  const { canvases, boardDiv } = buildHtml(squares, highlighted);
+  let firstClickDone = { state: false };
+  let gameOver = { gameOver: false, restarting: false };
+  const { canvases, boardDiv } = buildHtml(squares, highlighted, firstClickDone, gameOver);
   document.body.appendChild(boardDiv);
 
+  drawAllLoop(squares, highlighted, canvases, gameOver);
+}
+
+(() => {
   const cursor = document.getElementById('cursor');
   cursor.style.width = window.innerWidth * 0.01 + 'px';
   cursor.style.height = window.innerWidth * 0.01 + 'px';
   document.addEventListener('mousemove', e => { cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px'; });
-
-  drawAllLoop(squares, highlighted, canvases);
+  init();
 })();

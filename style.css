@@ -1,5 +1,8 @@
 #board {
     overflow: scroll;
+    position: fixed;
+    left: 25vw;
+    top: 10vh;
 }
 
 canvas {
@@ -16,6 +19,19 @@ body {
     position: fixed;
     pointer-events: none;
     transform: translate(-10%, -10%);
+    z-index: 3;
+}
+
+#gameOver {
+    display: none;
+    background-color: black;
+    position: fixed;
+    left: 37.5vw;
+    top: 1vh;
+    font-weight: bold;
+    font-size: 40pt;
+    color: red;
+    z-index: 2;
 }
 
 .planeRow {
