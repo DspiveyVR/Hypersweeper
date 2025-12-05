@@ -7,8 +7,24 @@
     <title>Hypersweeper</title>
 </head>
 <body>
-    <div id="cursor"></div>
-    <div id="gameOver">Game Over</div>
-    <script src="Board.js"></script>
+    <div id="mainMenu">
+        Hypersweeper
+    </div>
+    <div id="game">
+        <div id="cursor"></div>
+        <div id="gameOver"></div>
+        <div id="stopwatch"></div>
+        <img id="mine" style="display: none;" src="./Assets/Default/mine.png" alt="">
+        <img id="flag" style="display: none;" src="./Assets/Default/flag.png" alt="">
+        <div id="bombCountDiv">
+            <img id="bombCountImg" src="./Assets/Default/mine.png" alt="">
+            <p id="bombCount"></p>
+        </div>
+        <div id="scoreboard">
+            <h1>Scoreboard</h1>
+        </div>
+    </div>
+    <script type="module" src="Stopwatch.js"></script>
+    <script type="module" src="Board.js"></script>
 </body>
 </html>
