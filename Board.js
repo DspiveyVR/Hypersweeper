@@ -1,3 +1,4 @@
+import { checkAccountExists, createAccountWithUsername, load, loginWithUsername, save, submitBugReport } from "./Firebase.js";
 import { getStopwatch, formatTime } from "./Stopwatch.js";
 
 const sideLengthPx = window.innerWidth * 0.12;
@@ -9,15 +10,16 @@ const stopwatchDisplay = document.getElementById('stopwatch');
 const stopwatch = getStopwatch(stopwatchDisplay);
 let scores = [];
 
-const themes = {
-  BlackAndWhite: 'BlackAndWhite',
-  Default: 'Default'
-};
+const themes = [
+  'BlackAndWhite',
+  'Default'
+];
 
-let selectedTheme = themes.Default;
+let selectedThemeIndex = 1;
+let selectedTheme = themes[selectedThemeIndex];
 
-const mineImg = document.getElementById('mine');
-const flagImg = document.getElementById('flag');
+let mineImg = document.getElementById('mine');
+let flagImg = document.getElementById('flag');
 mineImg.src = `./Assets/${selectedTheme}/mine.png`;
 flagImg.src = `./Assets/${selectedTheme}/flag.png`;
 
@@ -300,9 +302,10 @@ const onClick = (e, canvas, squares, z, w, firstClickDone, gameOver) => {
         gameOverText.innerText = 'Game Over';
         squares.forEach(planeRow => 
           planeRow.forEach(plane => 
-            plane.forEach(row => 
-              row.forEach(sq => sq.isHidden = false)
-            )
+            plane.forEach(row => {
+              row.forEach(sq => sq.isHidden = false);
+              row.forEach(sq => sq.hasFlag = false);
+            })
           )
         );
         return;
@@ -315,15 +318,24 @@ const onClick = (e, canvas, squares, z, w, firstClickDone, gameOver) => {
     handleSquareClick(squareX, squareY, z, w, squares);
 
     if (getUnclearedSquares() == 0) {
+      squares.forEach(planeRow => 
+        planeRow.forEach(plane => 
+          plane.forEach(row => {
+            row.forEach(sq => sq.isHidden = false);
+            row.forEach(sq => sq.hasFlag = false);
+          })
+        )
+      );
       gameOver.gameOver = true;
       gameOver.win = true;
       stopwatch.stop();
       scores = [...scores, stopwatch.getElapsedtime()].sort();
-      updateScoreboard();
       const gameOverText = document.getElementById('gameOver');
       gameOverText.style.display = 'block';
       gameOverText.style.color = 'green';
       gameOverText.innerText = 'You Win!';
+      save(scores);
+      updateScoreboard();
     }
 };
 
@@ -383,7 +395,7 @@ const buildHtml = (squares, highlighted, firstClickDone, gameOver) => {
   return {canvases, boardDiv};
 };
 
-const init = () => {
+const init = async () => {
   document.getElementById('board')?.remove();
 
   const squares = getInitialSquares(boardDimensions);
@@ -401,18 +413,68 @@ const init = () => {
   drawAllLoop(squares, highlighted, canvases, gameOver);
 }
 
-(() => {
+(async () => {
   const cursor = document.getElementById('cursor');
   cursor.style.width = window.innerWidth * 0.01 + 'px';
   cursor.style.height = window.innerWidth * 0.01 + 'px';
   document.addEventListener('mousemove', e => { cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px'; });
-  const mainMenu = document.getElementById('mainMenu');
-  mainMenu.addEventListener('click', () => {
-    mainMenu.style.opacity = '0';
-    setTimeout(() => {
-      mainMenu.style.display = 'none';
-      stopwatch.start();
-    }, 500);
+
+
+  document.querySelector('#bugReport form').addEventListener('submit', async e => {
+    e.preventDefault(); 
+    
+    const formData = new FormData(e.target);
+    
+    const data = Object.fromEntries(formData.entries());
+
+    submitBugReport(data?.bugReport);
   });
+
+  document.querySelector('#account form').addEventListener('submit', async e => {
+    e.preventDefault(); 
+    
+    const formData = new FormData(e.target);
+    
+    const data = Object.fromEntries(formData.entries());
+
+    let success = false;
+    const exist = await checkAccountExists(data.username);
+    if (exist) {
+      success = await loginWithUsername(data.username, data.password);
+    } else {
+      success = await createAccountWithUsername(data.username, data.password);
+    }
+
+
+    if (success) {
+      const mainMenu = document.getElementById('mainMenu');
+      mainMenu.addEventListener('click', async () => {
+        mainMenu.style.opacity = '0';
+        scores = (await load())?.scores ?? [];
+        updateScoreboard();
+  
+        setTimeout(() => {
+          mainMenu.style.display = 'none';
+          stopwatch.start();
+        }, 500);
+      });
+
+      document.querySelector('#mainMenu h3').innerText = 'Click anywhere to continue';
+    }
+
+  });
+
+  document.getElementById('themeButton').addEventListener('click', () => {
+    selectedThemeIndex = (selectedThemeIndex + 1) % themes.length;
+    selectedTheme = themes[selectedThemeIndex];
+
+    mineImg = document.getElementById('mine');
+    flagImg = document.getElementById('flag');
+    const bombCountImg = document.getElementById('bombCountImg');
+    mineImg.src = `./Assets/${selectedTheme}/mine.png`;
+    flagImg.src = `./Assets/${selectedTheme}/flag.png`;
+    bombCountImg.src = `./Assets/${selectedTheme}/mine.png`;
+  });
+
   init();
 })();

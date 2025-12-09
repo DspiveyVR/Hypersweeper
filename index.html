@@ -1,14 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Hypersweeper</title>
 </head>
+
 <body>
+    <button id="themeButton">Switch Theme</button>
     <div id="mainMenu">
-        Hypersweeper
+        <div id="account">
+            <form>
+                <h2>Login / Create Account</h2>
+                <div class="form-group">
+                    <input type="text" id="username" name="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                </div>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div id="bugReport">
+            <form>
+                <h2>Bug Report</h2>
+                <div class="form-group">
+                    <textarea type="text" id="bugReportInput" name="bugReport" placeholder="Report a bug" required></textarea>
+                </div>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div id="info">
+            <h2>By:</h2>
+            <p>Denton Spivey (Leader) - dmspivey@usca.edu</p>
+            <p>Spencer DeHart - sdehart@usca.edu</p>
+        </div>
+        <h1>Hypersweeper</h1>
+        <h3>Log in to continue</h3>
+        <div id="tutorial">
+            <div id="tutorialHover">How to Play</div>
+            <div id="tutorialText">
+                Hypersweeper follows the rules of classic Minesweeper but the only difference is that the various planes
+                represent layers
+                of a 4D hyper-cube. Conceptually these planes are somehow layered on top of each other, which means that
+                each square has
+                far more adjacent squares than a typical Minesweeper game (a maximum of 80). In this game, the outlines
+                that appear when you
+                hover over a square serve as a guide to show you which squares are adjacent to the one you are currently
+                hovering over. Also
+                if you don't know how to play the original Minesweeper you should close your browser window immediately
+                lol.....
+            </div>
+        </div>
     </div>
     <div id="game">
         <div id="cursor"></div>
@@ -24,7 +69,19 @@
             <h1>Scoreboard</h1>
         </div>
     </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"
+        }
+    }
+    </script>
+    <script type="module" src="Firebase.js"></script>
     <script type="module" src="Stopwatch.js"></script>
     <script type="module" src="Board.js"></script>
 </body>
+
 </html>

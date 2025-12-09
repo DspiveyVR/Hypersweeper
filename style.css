@@ -8,16 +8,56 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 80pt;
-    font-weight: 900;
     color: #333;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    
     background-color: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(10px);
 
-    transition: opacity 0.5s ease-out; 
-    opacity: 1; 
+    transition: opacity 0.5s ease-out;
+    opacity: 1;
+}
+
+#mainMenu h1 {
+    text-align: center;
+    font-size: 80pt;
+    font-weight: 900;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#bugReport {
+    position: fixed;
+    display: block;
+    left: 80vw;
+    top: 60vh;
+}
+
+#mainMenu h3 {
+    position: fixed;
+    left: 42vw;
+    top: 55vh;
+    text-align: center;
+    font-size: 30pt;
+    font-weight: 900;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    background-color: #333;
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#info {
+    position: fixed;
+    display: block;
+    /* text-align: center; */
+    left: 5vw;
+    top: 80vh;
+    font-size: 20pt;
+}
+
+#account {
+    position: fixed;
+    display: block;
+    left: 80vw;
+    top: 50vh;
 }
 
 
@@ -28,12 +68,43 @@
     top: 10vh;
 }
 
+
+#tutorialText {
+    position: fixed;
+    left: 15vw;
+    top: 15vh;
+    max-width: 50vw;
+    font-size: 30pt;
+    background-color: black;
+    border-radius: 15px;
+    padding: 10px;
+    color: white;
+    display: none;
+}
+
+#tutorialHover {
+    color: black;
+    position: fixed;
+    left: 80vw;
+    top: 15vh;
+    background-color: #f3f3f3;
+    height: 4vh;
+    border: 10px dotted rgb(179, 179, 179);
+    border-radius: 15px;
+    font-size: 30pt;
+}
+
+#tutorialHover:hover + div {
+    display: block;
+}
+
 canvas {
     padding: 3px;
 }
 
 body {
     cursor: none;
+    background-color: white;
 }
 
 #cursor {
