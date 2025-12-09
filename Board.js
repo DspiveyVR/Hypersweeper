@@ -12,7 +12,10 @@ let scores = [];
 
 const themes = [
   'BlackAndWhite',
-  'Default'
+  'Default',
+  'Christmas',
+  'Easter',
+  'Halloween'
 ];
 
 let selectedThemeIndex = 1;
