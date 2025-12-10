@@ -70,6 +70,17 @@
         </div>
     </div>
 
+    <div id="game-container">
+        <!-- Your Minesweeper grid goes here -->
+        <div class="tile" onclick="checkTile(this)"></div>
+        <!-- ...more tiles -->
+
+        <!-- Explosion overlay -->
+        <div id="explosion-overlay">
+            <img id="kaboom" src="Assets/Kaboom.png">
+        </div>
+    </div>
+
     <script type="importmap">
     {
         "imports": {

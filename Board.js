@@ -32,6 +32,17 @@ const bombCountDisplay = document.getElementById('bombCount');
 const bombCountImg = document.getElementById('bombCountImg');
 bombCountImg.src = `./Assets/${selectedTheme}/mine.png`;
 
+function triggerKaboom() {
+    const kaboom = document.getElementById("kaboom");
+
+    // Activate explosion
+    kaboom.classList.add("active");
+
+    // Remove class after 2 seconds (animation duration)
+    setTimeout(() => {
+        kaboom.classList.remove("active");
+    }, 2000);
+}
 
 const deepCopy = obj => JSON.parse(JSON.stringify(obj));
 
@@ -303,6 +314,7 @@ const onClick = (e, canvas, squares, z, w, firstClickDone, gameOver) => {
         gameOverText.style.display = 'block';
         gameOverText.style.color = 'red';
         gameOverText.innerText = 'Game Over';
+        triggerKaboom();
         squares.forEach(planeRow => 
           planeRow.forEach(plane => 
             plane.forEach(row => {

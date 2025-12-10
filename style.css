@@ -133,7 +133,7 @@ body {
     left: 3vw;
     top: 15vh;
     font-size: 40pt;
-    color: black;
+    color: rgb(255, 4, 4);
     background-color: darkgray;
 }
 
@@ -164,4 +164,21 @@ body {
     white-space: nowrap;
     width: 100%;
     box-sizing: border-box;
+}
+
+#kaboom {
+    position: fixed;               /* relative to viewport */
+    top: 50%;
+    left: 50%;
+    width: 100px;                  /* initial size */
+    transform: translate(-50%, -50%) scale(0); /* center + start small */
+    opacity: 0;                     /* fully invisible */
+    transition: transform 2s ease-out, opacity 2s ease-out;
+    pointer-events: none;           /* clicks pass through */
+    z-index: 1000;                  /* on top of everything */
+}
+
+#kaboom.active {
+    transform: translate(-50%, -50%) scale(8); /* grow */
+    opacity: 1;                                /* fully visible */
 }
